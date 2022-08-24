@@ -1,3 +1,6 @@
+现在修改的是backbone之后的较高分辨率的featuremap监督低分辨率的featuremap。
+roi部分我没太弄懂，按说两阶段的deformable detr应该是一个deformable detr嵌套一个deformable detr，但是代码部分我确实是在proposal这部分没搞懂。
+
 # Deformable DETR
 
 By [Xizhou Zhu](https://scholar.google.com/citations?user=02RXI00AAAAJ),  [Weijie Su](https://www.weijiesu.com/),  [Lewei Lu](https://www.linkedin.com/in/lewei-lu-94015977/), [Bin Li](http://staff.ustc.edu.cn/~binli/), [Xiaogang Wang](http://www.ee.cuhk.edu.hk/~xgwang/), [Jifeng Dai](https://jifengdai.org/).
