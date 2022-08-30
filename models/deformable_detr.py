@@ -112,6 +112,24 @@ class DeformableDETR(nn.Module):
             for box_embed in self.bbox_embed:
                 nn.init.constant_(box_embed.layers[-1].bias.data[2:], 0.0)
 
+    def downsample(self, input, h, w):
+        H = input.shape[-2]
+        W = input.shape[-1]
+        out = input[:,:h,:w].clone().detach()
+        # out = torch.zeros(size=(1, h, w))#.cuda(0)#.cuda.set_device(0)
+        s = int(H/(h-1))
+        for i in range(h):
+            for j in range(w):
+                if (i*s<H) and (j*s<W):
+                    if input[0][i*s][j*s]:
+                        out[0][i][j] = 1#True
+
+                    else:
+                        out[0][i][j] = 0#False
+                # out[0][0][i][j] = input[0][0][i*s][j*s]
+        out_bool = out>0
+        return out_bool
+
     def forward(self, samples: NestedTensor):
         """ The forward expects a NestedTensor, which consists of:
                - samples.tensor: batched images, of shape [batch_size x 3 x H x W]
@@ -144,10 +162,10 @@ class DeformableDETR(nn.Module):
         # l_h = 256
         # l_w = 768
         im_data_l_tensors = F.interpolate(samples.tensors, size=[l_h, l_w])#NestedTensor
-        # mask = samples.mask.view(samples.mask.shape[0],-1,samples.mask.shape[-2],samples.mask.shape[-1])
-        # im_data_l_mask = F.interpolate(mask, size=(l_h, l_w), mode='bilinear')
-        # im_data_l = NestedTensor(im_data_l_tensors, im_data_l_mask)
-        im_data_l = NestedTensor(im_data_l_tensors,samples.mask)
+        mask = samples.mask#.view(samples.mask.shape[0],-1,samples.mask.shape[-2],samples.mask.shape[-1])
+        im_data_l_mask = self.downsample(mask, h = l_h, w = l_w)
+        im_data_l = NestedTensor(im_data_l_tensors, im_data_l_mask)
+        # im_data_l = NestedTensor(im_data_l_tensors,samples.mask)
         # feed image data to base model to obtain base feature map
         # features, pos  = self.backbone(samples)#
         # base_feat, pos  = self.backbone(im_data_l)#
